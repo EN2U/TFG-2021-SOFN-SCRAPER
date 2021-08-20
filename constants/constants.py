@@ -1,0 +1,2 @@
+ALCAMPO = "alcampo"
+CARREFOUR = "carrefour"

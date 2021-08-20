@@ -97,16 +97,22 @@ def carrefourScrap (df):
 
         if page.content:
           test = json.loads(page.content)
-          priceList = [ float(e['active_price']) for e in test['content']['docs'] ]
-          priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': getAverage(priceList) if priceList else float(0.00)}, ignore_index=True, verify_integrity=False)
+          if 'content' in test: 
+            print (':)')
+
+          if 'content' in test: 
+            priceList = [ float(e['active_price']) for e in test['content']['docs'] ]
+            priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': getAverage(priceList) if priceList else float(0.00)}, ignore_index=True, verify_integrity=False)
+          else:
+            priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
         else:
           print ("empty")
 
-    priceDf.to_csv("carrefourPrices.csv", index=False)
+    priceDf.to_csv("./dataScraped/carrefourPrices.csv", index=False)
 
     
 if __name__ == "__main__":
 
-    df = pd.read_json("./parsedCarrefour.json")
+    df = pd.read_json("./dataScraped/parsedCarrefour.json")
     print (len(df.index))
     carrefourScrap(df)
