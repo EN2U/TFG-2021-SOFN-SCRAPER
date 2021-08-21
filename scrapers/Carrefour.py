@@ -4,13 +4,13 @@ import random
 import pandas as pd
 from tqdm import tqdm
 
-from constants.constants import CARREFOUR_DATA, CARREFOUR_ERROR, CARREFOUR_URL, CARREFOUR_PRICE
+from constants.constants import CARREFOUR_DATA, CARREFOUR_ERROR, CARREFOUR_URL, CARREFOUR_PRICE, OPEN_FOOD_FACTS_DATA, OPEN_FOOD_FACTS_ERROR, OPEN_FOOD_FACTS_PRICE
 
 from headers.headers import PROXIES, USER_AGENTS
 
 class Carrefour:
   def __init__ (self):
-    self.carrefourDf = pd.read_json(CARREFOUR_DATA)
+    self.carrefourDf = pd.read_json(OPEN_FOOD_FACTS_DATA)
   
   def headers (self):
     return {
@@ -76,6 +76,6 @@ class Carrefour:
           errorDf = errorDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
           pass
 
-    priceDf.to_csv(CARREFOUR_PRICE, index=False)
-    errorDf.to_csv(CARREFOUR_ERROR, index=False)
+    priceDf.to_csv(OPEN_FOOD_FACTS_PRICE, index=False)
+    errorDf.to_csv(OPEN_FOOD_FACTS_ERROR, index=False)
 
