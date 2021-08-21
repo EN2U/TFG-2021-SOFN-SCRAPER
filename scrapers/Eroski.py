@@ -5,6 +5,7 @@ import pandas as pd
 from tqdm import tqdm
 from bs4 import BeautifulSoup
 
+from  constants.constants import EROSKI_DATA, EROSKI_ERROR, EROSKI_PRICE, EROSKI_URL
 from headers.headers import PROXIES, USER_AGENTS
 
 tqdm.pandas()
@@ -13,7 +14,7 @@ tqdm.pandas()
 class Eroski:
   def __init__(self):
 
-    self.alcampoDf = pd.read_json("./dataScraped/eroski/parsedEroski.json")
+    self.alcampoDf = pd.read_json(EROSKI_DATA)
 
   def cookies (self):
     return {
@@ -47,9 +48,9 @@ class Eroski:
       'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
     }
 
-  def params (self):
+  def params (self, product):
     return (
-      ('q', 'chocolate'),
+      ('q', product),
       ('suggestionsFilter', 'false'),
     )
 
@@ -83,9 +84,9 @@ class Eroski:
       name = row['product_name_es'] if row['product_name_es'] else row['product_name']
 
       try: 
-        page = requests.get(f'https://supermercado.eroski.es/es/search/results/', headers=self.headers(), params=self.params(), cookies=self.cookies())
+        page = requests.get(EROSKI_URL, headers=self.headers(), params=self.params(name), cookies=self.cookies())
 
-        priceList = self.priceList(productSoup = BeautifulSoup(page.content, 'html.parser'))
+        priceList = self.priceList(BeautifulSoup(page.content, 'html.parser'))
 
         if priceList:
           priceDf = priceDf.append({'id': str(row['_id']),'product_name': row['product_name'], 'product_name_es': row['product_name_es'], 'price': self.getAverage(priceList)}, ignore_index=True, verify_integrity=False)
@@ -96,5 +97,5 @@ class Eroski:
         errorDf = errorDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
         pass
 
-    priceDf.to_csv("./dataScraped/eroski/eroskiPrices.csv", index=False)
-    errorDf.to_csv("./dataScraped/eroski/errorEroskiPrices.csv", index=False)
+    priceDf.to_csv(EROSKI_PRICE, index=False)
+    errorDf.to_csv(EROSKI_ERROR, index=False)
