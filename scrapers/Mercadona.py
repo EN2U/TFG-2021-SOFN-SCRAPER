@@ -7,6 +7,7 @@ import pandas as pd
 from tqdm import tqdm
 from bs4 import BeautifulSoup
 
+from constants.constants import MERCADONA_DATA, MERCADONA_ERROR, MERCADONA_PRICE, MERCADONA_URL
 from headers.headers import PROXIES, USER_AGENTS
 
 tqdm.pandas()
@@ -15,7 +16,7 @@ tqdm.pandas()
 class Mercadona:
   def __init__(self):
 
-    self.mercadonaDf = pd.read_json("./dataScraped/mercadona/parsedMercadona.json")
+    self.mercadonaDf = pd.read_json(MERCADONA_DATA)
 
 
   def headers (self):
@@ -70,7 +71,7 @@ class Mercadona:
       name = row['product_name_es'] if row['product_name_es'] else row['product_name']
 
       try: 
-        page = requests.post('https://7uzjkl1dj0-dsn.algolia.net/1/indexes/products_prod_vlc1_es/query?x-algolia-agent=Algolia%20for%20JavaScript%20(3.35.1)%3B%20Browser&x-algolia-application-id=7UZJKL1DJ0&x-algolia-api-key=9d8f2e39e90df472b4f2e559a116fe17', headers=self.headers(), data=self.payload(name)).json()
+        page = requests.post(MERCADONA_URL, headers=self.headers(), data=self.payload(name)).json()
 
         if 'hits' in page:
           priceList = [ float(e['price_instructions']['unit_price']) for e in page['hits']]
@@ -82,5 +83,5 @@ class Mercadona:
         errorDf = errorDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
         pass
 
-    priceDf.to_csv("./dataScraped/mercadona/mercadonaPrices.csv", index=False)
-    errorDf.to_csv("./dataScraped/mercadona/errorMercadonaPrices.csv", index=False)
+    priceDf.to_csv(MERCADONA_PRICE, index=False)
+    errorDf.to_csv(MERCADONA_ERROR, index=False)
