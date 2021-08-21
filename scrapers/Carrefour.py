@@ -1,7 +1,5 @@
-from bs4 import element
 import requests
 import random
-import json
 
 import pandas as pd
 from tqdm import tqdm
@@ -19,7 +17,6 @@ class Carrefour:
       'authority': 'www.carrefour.es',
       'sec-ch-ua': '"Chromium";v="92", " Not A;Brand";v="99", "Google Chrome";v="92"',
       'sec-ch-ua-mobile': '?0',
-      'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36',
       'accept': '*/*',
       'User-agent': random.choice(USER_AGENTS),
       'http': random.choice(PROXIES).replace('\n', ''),
@@ -50,29 +47,35 @@ class Carrefour:
 
   def initializeScraper (self):
     priceDf = pd.DataFrame()
-
+    errorDf = pd.DataFrame()
     for index, row in tqdm(self.carrefourDf.iterrows(), total=self.carrefourDf.shape[0]):
         
         headers = self.headers()
         params = self.params(row['product_name_es'] if row['product_name_es'] else row['product_name'])
         
-        test = requests.get('https://www.carrefour.es/search-api/query/v1/search', headers=headers, params=params).json()
+        try: 
+          test = requests.get('https://www.carrefour.es/search-api/query/v1/search', headers=headers, params=params).json()
+          if 'content' in test: 
+            priceList = [ float(e['active_price']) for e in test['content']['docs'] ]
+            priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': self.getAverage(priceList) if priceList else float(0.00)}, ignore_index=True, verify_integrity=False)
+          else:
+            priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
+          if index == 35000:
+            priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
+          if index == 70000:
+            priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
+          if index == 100000:
+            priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
+          if index == 140000:
+            priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
+          if index == 170000:
+            priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
 
-        if 'content' in test: 
-          priceList = [ float(e['active_price']) for e in test['content']['docs'] ]
-          priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': self.getAverage(priceList) if priceList else float(0.00)}, ignore_index=True, verify_integrity=False)
-        else:
-          priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
-        if index == 35000:
-          priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
-        if index == 70000:
-          priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
-        if index == 100000:
-          priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
-        if index == 140000:
-          priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
-        if index == 170000:
-          priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
+        except ValueError:
+          print("Response content is not valid Json")
+          errorDf = errorDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
+          pass
 
     priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
+    errorDf.to_csv("./dataScraped/errorParsedOpenFoodFacts200k.csv", index=False)
 
