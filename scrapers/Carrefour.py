@@ -4,13 +4,13 @@ import random
 import pandas as pd
 from tqdm import tqdm
 
+from constants.constants import CARREFOUR_DATA, CARREFOUR_ERROR, CARREFOUR_URL, CARREFOUR_PRICE
 
 from headers.headers import PROXIES, USER_AGENTS
 
 class Carrefour:
   def __init__ (self):
-    print(":D")
-    self.carrefourDf = pd.read_json("./dataScraped/carrefour/parsedOpenFoodFacts200k.json")
+    self.carrefourDf = pd.read_json(CARREFOUR_DATA)
   
   def headers (self):
     return {
@@ -54,7 +54,7 @@ class Carrefour:
         params = self.params(row['product_name_es'] if row['product_name_es'] else row['product_name'])
         
         try: 
-          test = requests.get('https://www.carrefour.es/search-api/query/v1/search', headers=headers, params=params).json()
+          test = requests.get(CARREFOUR_URL, headers=headers, params=params).json()
           if 'content' in test: 
             priceList = [ float(e['active_price']) for e in test['content']['docs'] ]
             priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': self.getAverage(priceList) if priceList else float(0.00)}, ignore_index=True, verify_integrity=False)
@@ -76,6 +76,6 @@ class Carrefour:
           errorDf = errorDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
           pass
 
-    priceDf.to_csv("./dataScraped/carrefour/parsedOpenFoodFacts200k.csv", index=False)
-    errorDf.to_csv("./dataScraped/carrefour/errorParsedOpenFoodFacts200k.csv", index=False)
+    priceDf.to_csv(CARREFOUR_PRICE, index=False)
+    errorDf.to_csv(CARREFOUR_ERROR, index=False)
 
