@@ -35,7 +35,6 @@ class Hipercor:
 }
   def priceList (self, productSoup):
 
-    print ("price list")
     priceContainer = productSoup.find_all('div', class_='prices-price _current')
     return [ float(e.text.replace('\n', '').replace(' ', '').replace('€', '').replace(',', '.')) for e in priceContainer ]
 
@@ -45,23 +44,25 @@ class Hipercor:
 
   def initializeScraper (self):
     priceDf = pd.DataFrame()
+    errorDf = pd.DataFrame()
     for index, row in tqdm(self.hipercorDf.iterrows(), total=self.hipercorDf.shape[0]):
       
-      print ("headers")
       headers = self.headers()
-      print ("despues de los headers")
       name = row['product_name_es'] if row['product_name_es'] else row['product_name']
-      print ("antes de la request")
-      page = requests.get(f'https://www.hipercor.es/supermercado/buscar/?term={name}&search=text', headers=headers)
-      print (page)
-      print ("antes de beautiful")
-      productSoup = BeautifulSoup(page.content, 'html.parser')
-      print ("despues del beautiful")
-      priceList = self.priceList(productSoup)
-      print ("despues del price list")
-      if priceList:
-        priceDf = priceDf.append({'id': str(row['_id']),'product_name': row['product_name'], 'product_name_es': row['product_name_es'], 'price': self.getAverage(priceList)}, ignore_index=True, verify_integrity=False)
-      else:
-        priceDf = priceDf.append({'id': str(row['_id']), 'product_name': row['product_name'], 'product_name_es': row['product_name_es'], 'price': 0.00}, ignore_index=True, verify_integrity=False)
+
+      try: 
+        
+        page = requests.get(f'https://www.hipercor.es/supermercado/buscar/?term={name}&search=text', headers=headers)
+        priceList = self.priceList(BeautifulSoup(page.content, 'html.parser'))
+
+        if priceList:
+          priceDf = priceDf.append({'id': str(row['_id']),'product_name': row['product_name'], 'product_name_es': row['product_name_es'], 'price': self.getAverage(priceList)}, ignore_index=True, verify_integrity=False)
+        else:
+          priceDf = priceDf.append({'id': str(row['_id']), 'product_name': row['product_name'], 'product_name_es': row['product_name_es'], 'price': 0.00}, ignore_index=True, verify_integrity=False)
+      except ValueError:
+        print("Response content is not valid Json")
+        errorDf = errorDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
+        pass
 
     priceDf.to_csv("./dataScraped/hipercor/hipercorPrices.csv", index=False)
+    errorDf.to_csv("./dataScraped/errorHipercorPrices.csv", index=False)

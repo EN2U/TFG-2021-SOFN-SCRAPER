@@ -76,6 +76,6 @@ class Carrefour:
           errorDf = errorDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
           pass
 
-    priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
-    errorDf.to_csv("./dataScraped/errorParsedOpenFoodFacts200k.csv", index=False)
+    priceDf.to_csv("./dataScraped/carrefour/parsedOpenFoodFacts200k.csv", index=False)
+    errorDf.to_csv("./dataScraped/carrefour/errorParsedOpenFoodFacts200k.csv", index=False)
 
