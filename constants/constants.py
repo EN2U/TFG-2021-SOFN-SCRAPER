@@ -1,3 +1,3 @@
 ALCAMPO = "alcampo"
 CARREFOUR = "carrefour"
-HIPERCORD = "hipercor"
+HIPERCOR = "hipercor"
