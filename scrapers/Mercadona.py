@@ -40,24 +40,10 @@ class Mercadona:
 
   def payload (self, product):
     return json.dumps({
-    "query": product,
-    "clickAnalytics": "true",
-    "analyticsTags": "['web']"
-  })
-
-  def priceList (self, productSoup):
-    
-    print (productSoup)
-    priceContainer = productSoup.find_all('p', class_='product-price__unit-price subhead1-b')
-    priceContainer = priceContainer[2:len(priceContainer)]
-    priceList = list()
-    
-    for item in priceContainer:
-        priceList.append(item.text)
-
-    priceList = [x.replace('\n', '').replace(' ', '') for x in priceList]
-    
-    return priceList
+      "query": product,
+      "clickAnalytics": "true",
+      "analyticsTags": "['web']"
+    })
   
   def getAverage (self, priceList):
     return sum(priceList) / len(priceList)
