@@ -1,3 +1,5 @@
 ALCAMPO = "alcampo"
 CARREFOUR = "carrefour"
 HIPERCOR = "hipercor"
+DIA = "dia"
+MERCADONA = "mercadona"

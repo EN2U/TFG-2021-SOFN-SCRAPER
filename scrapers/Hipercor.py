@@ -1,6 +1,5 @@
 import requests
 import random
-import re
 
 import pandas as pd
 from tqdm import tqdm
@@ -11,10 +10,11 @@ from headers.headers import PROXIES, USER_AGENTS
 
 # hipercor da problemas con un user-agent randomizado xdimport requests
 
-
 class Hipercor:
   def __init__ (self):
-    self.hipercorDf = pd.read_json("./dataScraped/hipercor/parsedHipercor.json")
+    df1 = pd.read_json("./dataScraped/hipercor/parsedCorteIngles.json")
+    df2 = pd.read_json("./dataScraped/hipercor/parsedHipercor.json")
+    self.hipercorDf = pd.concat([df1, df2])
 
   
   def headers (self):
@@ -51,7 +51,8 @@ class Hipercor:
       name = row['product_name_es'] if row['product_name_es'] else row['product_name']
 
       try: 
-        
+        # corte ingle https://www.elcorteingles.es/supermercado/buscar/?term={name}&search=text
+        # hipercor https://www.hipercor.es/supermercado/buscar/?term={name}&search=text
         page = requests.get(f'https://www.hipercor.es/supermercado/buscar/?term={name}&search=text', headers=headers)
         priceList = self.priceList(BeautifulSoup(page.content, 'html.parser'))
 
@@ -65,4 +66,4 @@ class Hipercor:
         pass
 
     priceDf.to_csv("./dataScraped/hipercor/hipercorPrices.csv", index=False)
-    errorDf.to_csv("./dataScraped/errorHipercorPrices.csv", index=False)
+    errorDf.to_csv("./dataScraped/hipercor/errorHipercorPrices.csv", index=False)
