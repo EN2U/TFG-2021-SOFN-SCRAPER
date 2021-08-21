@@ -15,7 +15,7 @@ CARREFOUR_URL = 'https://www.carrefour.es/search-api/query/v1/search'
 EROSKI_URL = 'https://supermercado.eroski.es/es/search/results/'
 HIPERCOR_URL = 'https://www.hipercor.es/supermercado/buscar/'
 MERCADONA_URL ='https://7uzjkl1dj0-dsn.algolia.net/1/indexes/products_prod_vlc1_es/query?x-algolia-agent=Algolia%20for%20JavaScript%20(3.35.1)%3B%20Browser&x-algolia-application-id=7UZJKL1DJ0&x-algolia-api-key=9d8f2e39e90df472b4f2e559a116fe17'
-
+DIA_URL = 'https://www.dia.es/compra-online/search'
 # Data json store location 
 
 ALCAMPO_DATA = './dataScraped/alcampo/parsedAlcampo.json'
