@@ -71,7 +71,7 @@ class Dia:
 
       try: 
         page = requests.get(DIA_URL, headers=self.headers(), params=self.params(name))
-        priceList = self.priceList(productSoup = BeautifulSoup(page.content, 'html.parser'))
+        priceList = self.priceList(BeautifulSoup(page.content, 'html.parser'))
 
         if priceList:
           priceDf = priceDf.append({'id': str(row['_id']),'product_name': row['product_name'], 'product_name_es': row['product_name_es'], 'price': self.getAverage(priceList)}, ignore_index=True, verify_integrity=False)
