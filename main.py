@@ -5,6 +5,8 @@ from scrapers.Carrefour import Carrefour
 from scrapers.Hipercor import Hipercor
 from scrapers.Dia import Dia
 from scrapers.Mercadona import Mercadona
+from scrapers.Eroski import Eroski
+
 
 
 def evaluateName (name):
@@ -23,7 +25,10 @@ def evaluateName (name):
   if name == constants.MERCADONA:
     mercadonaScraper = Mercadona()
     mercadonaScraper.initializeScraper()
+  if name == constants.EROSKI:
+    eroskiScraper = Eroski()
+    eroskiScraper.initializeScraper()
 if __name__ == "__main__":
   ### Id del supermercado
-  name = "dia"
+  name = "eroski"
   evaluateName(name)

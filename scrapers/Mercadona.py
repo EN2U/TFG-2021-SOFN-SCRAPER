@@ -1,4 +1,6 @@
 import requests
+import json
+
 import random
 
 import pandas as pd
@@ -10,10 +12,10 @@ from headers.headers import PROXIES, USER_AGENTS
 tqdm.pandas()
 
 
-class Dia:
+class Mercadona:
   def __init__(self):
 
-    self.diaDf = pd.read_json("./dataScraped/dia/parsedDia.json")
+    self.mercadonaDf = pd.read_json("./dataScraped/mercadona/parsedMercadona.json")
 
 
   def headers (self):
@@ -22,8 +24,7 @@ class Dia:
       'sec-ch-ua': '"Chromium";v="92", " Not A;Brand";v="99", "Google Chrome";v="92"',
       'accept': 'application/json',
       'sec-ch-ua-mobile': '?0',
-      'User-agent': random.choice(USER_AGENTS),
-      'http': random.choice(PROXIES).replace('\n', ''),
+      'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36',
       'content-type': 'application/x-www-form-urlencoded',
       'Origin': 'https://tienda.mercadona.es',
       'Sec-Fetch-Site': 'cross-site',
@@ -31,11 +32,22 @@ class Dia:
       'Sec-Fetch-Dest': 'empty',
       'Referer': 'https://tienda.mercadona.es/',
       'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+      'Content-Type': 'application/json',
+      'User-agent': random.choice(USER_AGENTS),
+      'http': random.choice(PROXIES).replace('\n', ''),
     }
+
+  def payload (self, product):
+    return json.dumps({
+    "query": product,
+    "clickAnalytics": "true",
+    "analyticsTags": "['web']"
+  })
 
   def priceList (self, productSoup):
     
-    priceContainer = productSoup.find_all('span', class_='price')
+    print (productSoup)
+    priceContainer = productSoup.find_all('p', class_='product-price__unit-price subhead1-b')
     priceContainer = priceContainer[2:len(priceContainer)]
     priceList = list()
     
@@ -47,35 +59,28 @@ class Dia:
     return priceList
   
   def getAverage (self, priceList):
-    x = float(0.00)
-    avgPrice = float(0.00)
-    for price in priceList:
-      x = float(price.split("€")[0].replace(",", "."))
-      avgPrice = avgPrice + x
-    return avgPrice / len(priceList)
+    return sum(priceList) / len(priceList)
   
   def initializeScraper (self):
     priceDf = pd.DataFrame()
     errorDf = pd.DataFrame()
 
-    for index, row in tqdm(self.diaDf.iterrows(), total=self.diaDf.shape[0]):
+    for index, row in tqdm(self.mercadonaDf.iterrows(), total=self.mercadonaDf.shape[0]):
       
-      headers = self.headers()
       name = row['product_name_es'] if row['product_name_es'] else row['product_name']
 
       try: 
-        page = requests.get(f'https://www.dia.es/compra-online/search?q={name}%3Arelevance&text={name}page=1', headers=headers)
+        page = requests.post('https://7uzjkl1dj0-dsn.algolia.net/1/indexes/products_prod_vlc1_es/query?x-algolia-agent=Algolia%20for%20JavaScript%20(3.35.1)%3B%20Browser&x-algolia-application-id=7UZJKL1DJ0&x-algolia-api-key=9d8f2e39e90df472b4f2e559a116fe17', headers=self.headers(), data=self.payload(name)).json()
 
-        priceList = self.priceList(productSoup = BeautifulSoup(page.content, 'html.parser'))
-
-        if priceList:
-          priceDf = priceDf.append({'id': str(row['_id']),'product_name': row['product_name'], 'product_name_es': row['product_name_es'], 'price': self.getAverage(priceList)}, ignore_index=True, verify_integrity=False)
+        if 'hits' in page:
+          priceList = [ float(e['price_instructions']['unit_price']) for e in page['hits']]
+          priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': self.getAverage(priceList) if priceList else float(0.00)}, ignore_index=True, verify_integrity=False)
         else:
-          priceDf = priceDf.append({'id': str(row['_id']), 'product_name': row['product_name'], 'product_name_es': row['product_name_es'], 'price': 0.00}, ignore_index=True, verify_integrity=False)
+          priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
       except ValueError:
         print("Response content is not valid Json")
         errorDf = errorDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
         pass
 
-    priceDf.to_csv("./dataScraped/dia/diaPrices.csv", index=False)
-    errorDf.to_csv("./dataScraped/dia/errorDiaPrices.csv", index=False)
+    priceDf.to_csv("./dataScraped/mercadona/mercadonaPrices.csv", index=False)
+    errorDf.to_csv("./dataScraped/mercadona/errorMercadonaPrices.csv", index=False)

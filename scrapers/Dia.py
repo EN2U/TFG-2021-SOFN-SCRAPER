@@ -34,7 +34,7 @@ class Dia:
 
   def priceList (self, productSoup):
     
-    priceContainer = productSoup.find_all('span', class_='price')
+    priceContainer = productSoup.find_all('p', class_='price')
     priceContainer = priceContainer[2:len(priceContainer)]
     priceList = list()
     
@@ -64,7 +64,6 @@ class Dia:
 
       try: 
         page = requests.get(f'https://www.dia.es/compra-online/search?q={name}%3Arelevance&text={name}page=1', headers=headers)
-
         priceList = self.priceList(productSoup = BeautifulSoup(page.content, 'html.parser'))
 
         if priceList:
@@ -75,6 +74,7 @@ class Dia:
         print("Response content is not valid Json")
         errorDf = errorDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
         pass
+
 
     priceDf.to_csv("./dataScraped/dia/diaPrices.csv", index=False)
     errorDf.to_csv("./dataScraped/dia/errorDiaPrices.csv", index=False)
