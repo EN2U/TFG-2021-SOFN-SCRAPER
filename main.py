@@ -1,16 +1,17 @@
 from constants import constants
 
 from scrapers.Alcampo import Alcampo
-import pandas as pd
+from scrapers.Carrefour import Carrefour
 
 def evaluateName (name):
   if name == constants.ALCAMPO:
-    alcampoScraper = Alcampo(pd.read_json("./dataScraped/alcampo/parsedAlcampo.json"))
+    alcampoScraper = Alcampo()
     alcampoScraper.initializeScraper()
   if name == constants.CARREFOUR:
-    print()
+    carrefourScraper = Carrefour()
+    carrefourScraper.initializeScraper()
 
 if __name__ == "__main__":
   ### Id del supermercado
-  name = "alcampo"
+  name = "carrefour"
   evaluateName(name)

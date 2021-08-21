@@ -11,8 +11,10 @@ tqdm.pandas()
 
 
 class Alcampo:
-  def __init__(self, df):
-    self.alcampoDf = df
+  def __init__(self):
+    df1 = pd.read_json("./dataScraped/alcampo/parsedAlcampo.json")
+    df2 = pd.read_json("./dataScraped/alcampo/parsedAuchan.json")
+    self.alcampoDf = pd.concat([df1, df2])
 
 
   def headers (self):
@@ -62,7 +64,7 @@ class Alcampo:
         priceDf = priceDf.append({'id': str(row['_id']),'product_name': row['product_name'], 'product_name_es': row['product_name_es'], 'price': self.getAverage(priceList)}, ignore_index=True, verify_integrity=False)
       else:
         priceDf = priceDf.append({'id': str(row['_id']), 'product_name': row['product_name'], 'product_name_es': row['product_name_es'], 'price': 0.00}, ignore_index=True, verify_integrity=False)
-        
+
     priceDf.to_csv("./dataScraped/alcampo/alcampoPrices.csv", index=False)
 
       
