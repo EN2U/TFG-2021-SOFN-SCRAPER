@@ -48,8 +48,8 @@ class Carrefour:
   def initializeScraper (self):
     priceDf = pd.DataFrame()
     errorDf = pd.DataFrame()
-    for index, row in tqdm(self.carrefourDf.iterrows(), total=self.carrefourDf.shape[0]):
-        
+    index = 35000
+    for index, row in tqdm(self.carrefourDf.iterrows(),initial=170000, total=self.carrefourDf.shape[0]):
         headers = self.headers()
         params = self.params(row['product_name_es'] if row['product_name_es'] else row['product_name'])
         
@@ -60,12 +60,9 @@ class Carrefour:
             priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': self.getAverage(priceList) if priceList else float(0.00)}, ignore_index=True, verify_integrity=False)
           else:
             priceDf = priceDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
-          if index == 35000:
-            priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
-          if index == 70000:
-            priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
-          if index == 100000:
-            priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
+          if index == 30000:
+            priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k170-200.csv", index=False)
+            break
           if index == 140000:
             priceDf.to_csv("./dataScraped/parsedOpenFoodFacts200k.csv", index=False)
           if index == 170000:
@@ -76,6 +73,6 @@ class Carrefour:
           errorDf = errorDf.append({'id': str(row['_id']), 'product_name_es': row['product_name_es'], 'product_name': row['product_name'], 'price': float(0.00)}, ignore_index=True, verify_integrity=False)
           pass
 
-    priceDf.to_csv(OPEN_FOOD_FACTS_PRICE, index=False)
+    # priceDf.to_csv(OPEN_FOOD_FACTS_PRICE, index=False)
     errorDf.to_csv(OPEN_FOOD_FACTS_ERROR, index=False)
 
